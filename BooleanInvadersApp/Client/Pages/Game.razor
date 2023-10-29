@@ -2,6 +2,7 @@
 @page "/BooleanInvaders"
 
 <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
+    <div class="score">Score: @score</div>
     <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
 
     @foreach (var alien in aliens)
@@ -13,7 +14,11 @@
     {
         <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
     }
-
+    @if (isGameOver)
+    {
+        <div class="game-over">Game Over</div>
+        <button @onclick="RestartGame">Restart</button>
+    }
 </div>
 
 @code {
@@ -21,6 +26,10 @@
     private PlayerShip player;
     private List<Alien> aliens;
     private List<PlayerBullet> bullets;
+    private bool isGameOver = false;
+    private List<PlayerBullet> bulletsToRemove = new List<PlayerBullet>();
+    private int score = 0;
+
 
     protected override void OnInitialized()
     {
@@ -65,6 +74,20 @@
         }
     }
 
+    private void RestartGame()
+    {
+        // Reset game state
+        isGameOver = false;
+        player = new PlayerShip { X = 400, Y = 550 };
+        aliens.Clear();
+        bullets.Clear();
+        for (int i = 0; i < 5; i++)
+        {
+            aliens.Add(new Alien { X = i * 60, Y = 50 });
+        }
+        gameTimer = new Timer(GameUpdate, null, 0, 16); // Restart the game timer
+    }
+
     private void GameUpdate(object state)
     {
         // Move bullets
@@ -73,8 +96,57 @@
             bullet.Y -= 5;  // Adjust speed as needed
         }
 
-        // Remove bullets that are out of bounds
-        bullets.RemoveAll(b => b.Y < 0);
+        // Collision detection
+        foreach (var bullet in bullets)
+        {
+            var hitAlien = aliens.FirstOrDefault(a =>
+                bullet.X > a.X && bullet.X < a.X + 40 &&
+                bullet.Y > a.Y && bullet.Y < a.Y + 40);
+
+            if (hitAlien != null)
+            {
+                aliens.Remove(hitAlien);
+                bulletsToRemove.Add(bullet);
+                score += 10;  // Increase score by 10 for each alien hit
+            }
+        }
+
+        // Remove bullets that are out of bounds or have hit an alien
+        bullets.RemoveAll(b => b.Y < 0 || bulletsToRemove.Contains(b));
+
+        // Clear the bulletsToRemove list for the next update
+        bulletsToRemove.Clear();
+
+        // moving of aliens
+        foreach (var alien in aliens)
+        {
+            int moveSpeed = 5 + (score / 100);  // Increase speed for every 100 points
+            if (alien.MovingRight)
+            {
+                alien.X += moveSpeed;
+                if (alien.X > 750)  // Assuming 800px width and 50px alien width
+                {
+                    alien.MovingRight = false;
+                    alien.Y += 40;  // Move down when hitting the edge
+                }
+            }
+            else
+            {
+                alien.X -= moveSpeed;
+                if (alien.X < 0)
+                {
+                    alien.MovingRight = true;
+                    alien.Y += 40;  // Move down when hitting the edge
+                }
+            }
+        }
+
+        if (aliens.Any(a => a.Y + 40 >= 550) ||  // Alien reached the bottom
+       aliens.Any(a => a.X >= player.X && a.X <= player.X + 50 && a.Y >= player.Y && a.Y <= player.Y + 20))  // Alien collided with player
+        {
+            isGameOver = true;
+            gameTimer.Dispose();  // Stop the game timer
+        }
 
         StateHasChanged();  // Request a re-render
     }
