@@ -1,0 +1,81 @@
+﻿@using BooleanInvadersApp.Client.Entities;
+@page "/BooleanInvaders"
+
+<div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
+    <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
+
+    @foreach (var alien in aliens)
+    {
+        <div class="alien" style="left: @(alien.X + "px"); top: @(alien.Y + "px");"></div>
+    }
+
+    @foreach (var bullet in bullets)
+    {
+        <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+    }
+
+</div>
+
+@code {
+    private Timer gameTimer;
+    private PlayerShip player;
+    private List<Alien> aliens;
+    private List<PlayerBullet> bullets;
+
+    protected override void OnInitialized()
+    {
+        player = new PlayerShip { X = 400, Y = 550 }; // Starting position
+        aliens = new List<Alien>();
+        bullets = new List<PlayerBullet>();
+
+        // Initialize aliens
+        for (int i = 0; i < 5; i++)
+        {
+            aliens.Add(new Alien { X = i * 60, Y = 50 });
+        }
+
+        gameTimer = new Timer(GameUpdate, null, 0, 16); // Approx 60 FPS
+    }
+
+    private void FireBullet()
+    {
+        var bullet = new PlayerBullet
+            {
+                X = player.X + 22,  // Center the bullet relative to the player
+                Y = player.Y
+            };
+        bullets.Add(bullet);
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        const int moveDistance = 10;
+
+        switch (e.Key)
+        {
+            case "ArrowLeft":
+                player.X = Math.Max(player.X - moveDistance, 0);  // Prevent moving out of bounds
+                break;
+            case "ArrowRight":
+                player.X = Math.Min(player.X + moveDistance, 750);  // Assuming 800px width and 50px player width
+                break;
+            case " ":
+                FireBullet();
+                break;
+        }
+    }
+
+    private void GameUpdate(object state)
+    {
+        // Move bullets
+        foreach (var bullet in bullets)
+        {
+            bullet.Y -= 5;  // Adjust speed as needed
+        }
+
+        // Remove bullets that are out of bounds
+        bullets.RemoveAll(b => b.Y < 0);
+
+        StateHasChanged();  // Request a re-render
+    }
+    }
