@@ -396,3 +396,11 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+*/**/bin/Debug   
+*/**/bin/Release   
+*/**/obj/Debug   
+*/**/obj/Release
+/BooleanInvadersApp/Server/appsettings.json
+/BooleanInvadersApp/Client/Properties/launchSettings.json
+/BooleanInvadersApp/Server/appsettings.json
