@@ -1,4 +1,4 @@
-﻿@using BooleanInvadersApp.Client.Entities;
+﻿@using BooleanInvadersApp.Client.Entities
 @page "/BooleanInvaders"
 
 <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
@@ -14,6 +14,7 @@
     {
         <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
     }
+
     @if (isGameOver)
     {
         <div class="game-over">Game Over</div>
@@ -29,44 +30,57 @@
     private bool isGameOver = false;
     private List<PlayerBullet> bulletsToRemove = new List<PlayerBullet>();
     private int score = 0;
-
+    private bool moveDown = false;
+    decimal baseSpeed = 0.5m;
 
     protected override void OnInitialized()
     {
-        player = new PlayerShip { X = 400, Y = 550 }; // Starting position
+        InitializeGame();
+        gameTimer = new Timer(GameUpdate, null, 0, 16); // 60 FPS
+    }
+
+    private void InitializeGame()
+    {
+        player = new PlayerShip { X = 400, Y = 550 }; // starting position
         aliens = new List<Alien>();
         bullets = new List<PlayerBullet>();
 
-        // Initialize aliens
-        for (int i = 0; i < 5; i++)
+        // Initialize aliens in a grid
+        int startingX = 180;
+        int startingY = 50;
+        for (int row = 0; row < 5; row++) // 5 rows of aliens
         {
-            aliens.Add(new Alien { X = i * 60, Y = 50 });
+            for (int col = 0; col < 10; col++) // 10 columns
+            {
+                aliens.Add(new Alien { X = startingX + col * 60, Y = startingY + row * 40, MovingRight = true });
+            }
         }
-
-        gameTimer = new Timer(GameUpdate, null, 0, 16); // Approx 60 FPS
     }
 
     private void FireBullet()
     {
-        var bullet = new PlayerBullet
-            {
-                X = player.X + 22,  // Center the bullet relative to the player
-                Y = player.Y
-            };
-        bullets.Add(bullet);
+        if (!bullets.Any()) // so it only fires if there's not a bullet on screen
+        {
+            var bullet = new PlayerBullet
+                {
+                    X = player.X + 22,  // to center the bullet relative to the player
+                    Y = player.Y
+                };
+            bullets.Add(bullet);
+        }
     }
 
     private void HandleKeyDown(KeyboardEventArgs e)
     {
-        const int moveDistance = 10;
+        const int moveDistance = 20;
 
         switch (e.Key)
         {
             case "ArrowLeft":
-                player.X = Math.Max(player.X - moveDistance, 0);  // Prevent moving out of bounds
+                player.X = Math.Max(player.X - moveDistance, 0);  // not going out of the bound with this
                 break;
             case "ArrowRight":
-                player.X = Math.Min(player.X + moveDistance, 750);  // Assuming 800px width and 50px player width
+                player.X = Math.Min(player.X + moveDistance, 750);  // for now 800px width and 50px player width ----> need to correct later
                 break;
             case " ":
                 FireBullet();
@@ -76,16 +90,11 @@
 
     private void RestartGame()
     {
-        // Reset game state
         isGameOver = false;
-        player = new PlayerShip { X = 400, Y = 550 };
-        aliens.Clear();
+        score = 0;
         bullets.Clear();
-        for (int i = 0; i < 5; i++)
-        {
-            aliens.Add(new Alien { X = i * 60, Y = 50 });
-        }
-        gameTimer = new Timer(GameUpdate, null, 0, 16); // Restart the game timer
+        InitializeGame();
+        gameTimer = new Timer(GameUpdate, null, 0, 16); // and restart the game timer
     }
 
     private void GameUpdate(object state)
@@ -93,7 +102,7 @@
         // Move bullets
         foreach (var bullet in bullets)
         {
-            bullet.Y -= 5;  // Adjust speed as needed
+            bullet.Y -= 15;  // we can adjust speed as needed
         }
 
         // Collision detection
@@ -105,49 +114,63 @@
 
             if (hitAlien != null)
             {
+                // differentiate score based on alien row -> TODO
+                int alienRowIndex = aliens.IndexOf(hitAlien) / 10; //  10 columns
+                if (alienRowIndex == 0)
+                    score += 30;
+                else if (alienRowIndex >= 1 && alienRowIndex <= 3)
+                    score += 20;
+                else
+                    score += 10;
+
                 aliens.Remove(hitAlien);
                 bulletsToRemove.Add(bullet);
-                score += 10;  // Increase score by 10 for each alien hit
             }
         }
 
-        // Remove bullets that are out of bounds or have hit an alien
+        // we need to remove bullets that are out of bounds or have hit an alien
         bullets.RemoveAll(b => b.Y < 0 || bulletsToRemove.Contains(b));
-
-        // Clear the bulletsToRemove list for the next update
         bulletsToRemove.Clear();
 
-        // moving of aliens
+        // and check if any alien has hit the left or right edge
+        bool hitLeftEdge = aliens.Any(a => a.X <= 0);
+        bool hitRightEdge = aliens.Any(a => a.X >= 760); // 800 - 40 (alien width)
+
+        if (hitLeftEdge || hitRightEdge)
+        {
+            // then move all aliens down one row
+            foreach (var alien in aliens)
+            {
+                alien.Y += 40; // and move down by 40px (alien height)
+            }
+
+            // last reverse direction for all aliens
+            foreach (var alien in aliens)
+            {
+                alien.MovingRight = !alien.MovingRight;
+            }
+        }
+
+        // the regular left-right movement ---- TODO
+        int moveSpeed = 1;
         foreach (var alien in aliens)
         {
-            int moveSpeed = 5 + (score / 100);  // Increase speed for every 100 points
-            if (alien.MovingRight)
-            {
-                alien.X += moveSpeed;
-                if (alien.X > 750)  // Assuming 800px width and 50px alien width
-                {
-                    alien.MovingRight = false;
-                    alien.Y += 40;  // Move down when hitting the edge
-                }
-            }
-            else
-            {
-                alien.X -= moveSpeed;
-                if (alien.X < 0)
-                {
-                    alien.MovingRight = true;
-                    alien.Y += 40;  // Move down when hitting the edge
-                }
-            }
+            alien.X += alien.MovingRight ? moveSpeed : -moveSpeed;
         }
 
         if (aliens.Any(a => a.Y + 40 >= 550) ||  // Alien reached the bottom
-       aliens.Any(a => a.X >= player.X && a.X <= player.X + 50 && a.Y >= player.Y && a.Y <= player.Y + 20))  // Alien collided with player
+            aliens.Any(a => a.X >= player.X && a.X <= player.X + 50 && a.Y >= player.Y && a.Y <= player.Y + 20))  // an alien collided with player
         {
             isGameOver = true;
-            gameTimer.Dispose();  // Stop the game timer
+            gameTimer.Dispose();  // then top the game timer
         }
 
-        StateHasChanged();  // Request a re-render
+        // and last if all aliens are destroyed, reset the game with a new wave
+        if (!aliens.Any())
+        {
+            InitializeGame();
+        }
+
+        StateHasChanged();  // finally request a re-render
     }
-    }
+}
