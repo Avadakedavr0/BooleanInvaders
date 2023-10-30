@@ -1,5 +1,12 @@
-﻿@using BooleanInvadersApp.Client.Entities
+﻿﻿@using BooleanInvadersApp.Client.Entities
+@using BooleanInvadersApp.Client.Enums
 @page "/BooleanInvaders"
+
+<select @bind="currentDifficulty" @bind:event="onchange">
+    <option value="Easy">Easy</option>
+    <option value="Medium">Medium</option>
+    <option value="Hard">Hard</option>
+</select>
 
 <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
     <div class="score">Score: @score</div>
@@ -7,7 +14,7 @@
 
     @foreach (var alien in aliens)
     {
-        <div class="alien" style="left: @(alien.X + "px"); top: @(alien.Y + "px");"></div>
+        <div class="alien" style="left: @((int)alien.X + "px"); top: @((int)alien.Y + "px");"></div>
     }
 
     @foreach (var bullet in bullets)
@@ -31,12 +38,42 @@
     private List<PlayerBullet> bulletsToRemove = new List<PlayerBullet>();
     private int score = 0;
     private bool moveDown = false;
-    decimal baseSpeed = 0.5m;
+    private double baseMoveSpeed = 0.1; // base speed
+    private double moveSpeedIncrement = 0.1; // speed increase per level
+    private DifficultyLevel _currentDifficulty = DifficultyLevel.Easy; // default easy
+
+    public DifficultyLevel currentDifficulty
+    {
+        get => _currentDifficulty;
+        set
+        {
+            _currentDifficulty = value;
+            AdjustMoveSpeedForDifficulty();
+        }
+    }
+    private int level = 1; // to start at level 1
 
     protected override void OnInitialized()
     {
+        AdjustMoveSpeedForDifficulty();
         InitializeGame();
         gameTimer = new Timer(GameUpdate, null, 0, 16); // 60 FPS
+    }
+
+    private void AdjustMoveSpeedForDifficulty() // for different difficulty levels
+    {
+        switch (currentDifficulty)
+        {
+            case DifficultyLevel.Easy:
+                baseMoveSpeed = 0.05;
+                break;
+            case DifficultyLevel.Medium:
+                baseMoveSpeed = 0.1; 
+                break;
+            case DifficultyLevel.Hard:
+                baseMoveSpeed = 0.2; 
+                break;
+        }
     }
 
     private void InitializeGame()
@@ -45,7 +82,7 @@
         aliens = new List<Alien>();
         bullets = new List<PlayerBullet>();
 
-        // Initialize aliens in a grid
+        // to initialize aliens in a grid
         int startingX = 180;
         int startingY = 50;
         for (int row = 0; row < 5; row++) // 5 rows of aliens
@@ -88,21 +125,12 @@
         }
     }
 
-    private void RestartGame()
-    {
-        isGameOver = false;
-        score = 0;
-        bullets.Clear();
-        InitializeGame();
-        gameTimer = new Timer(GameUpdate, null, 0, 16); // and restart the game timer
-    }
-
     private void GameUpdate(object state)
     {
         // Move bullets
         foreach (var bullet in bullets)
         {
-            bullet.Y -= 15;  // we can adjust speed as needed
+            bullet.Y -= 20;  // we can adjust speed as needed
         }
 
         // Collision detection
@@ -151,8 +179,8 @@
             }
         }
 
-        // the regular left-right movement ---- TODO
-        int moveSpeed = 1;
+        // the regular left-right movement
+        double moveSpeed = baseMoveSpeed + (level - 1) * moveSpeedIncrement; // ----TODO
         foreach (var alien in aliens)
         {
             alien.X += alien.MovingRight ? moveSpeed : -moveSpeed;
@@ -168,9 +196,20 @@
         // and last if all aliens are destroyed, reset the game with a new wave
         if (!aliens.Any())
         {
+            level++; // increase the level
             InitializeGame();
         }
 
         StateHasChanged();  // finally request a re-render
+    }
+
+    private void RestartGame()
+    {
+        isGameOver = false;
+        score = 0;
+        bullets.Clear();
+        level = 1; // reset the level
+        InitializeGame();
+        gameTimer = new Timer(GameUpdate, null, 0, 16); // and restart the game timer
     }
 }
