@@ -37,3 +37,28 @@
     font-size: 2rem;
     color: red;
 }
+
+.start-game-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin: 10px 0;
+    display: block;
+    font-size: 1.2em;
+}
+
+.lives {
+    margin-top: 10px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.alien-bullet {
+    width: 5px;
+    height: 10px;
+    background-color: red;
+    position: absolute;
+    z-index: 1000;
+}

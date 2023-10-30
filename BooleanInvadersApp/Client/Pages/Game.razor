@@ -2,6 +2,8 @@
 @using BooleanInvadersApp.Client.Enums
 @page "/BooleanInvaders"
 
+<button @onclick="StartGame" class="start-game-btn">Start Game</button>
+<div class="lives">Lives: @playerLives</div>
 <select @bind="currentDifficulty" @bind:event="onchange">
     <option value="Easy">Easy</option>
     <option value="Medium">Medium</option>
@@ -20,6 +22,11 @@
     @foreach (var bullet in bullets)
     {
         <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+    }
+
+    @foreach (var bullet in alienBullets)
+    {
+        <div class="alien-bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
     }
 
     @if (isGameOver)
@@ -41,7 +48,14 @@
     private double baseMoveSpeed = 0.1; // base speed
     private double moveSpeedIncrement = 0.1; // speed increase per level
     private DifficultyLevel _currentDifficulty = DifficultyLevel.Easy; // default easy
+    private int level = 1; // to start at level 1
+    private int playerLives = 3; // to start with 3 lives for the current player
+    private List<AlienBullet> alienBullets = new List<AlienBullet>(); // to track the alien bullets
+    private Random random = new Random(); // for choosing a ramdon alien to shoot a bullet to the player
+    private int lastShootingAlienIndex = -1;  // and nitialize to -1 so the first alien shoots first
+    private int frameCounter = 0;  // initialize to 0
 
+    // setting the difficulty
     public DifficultyLevel currentDifficulty
     {
         get => _currentDifficulty;
@@ -51,7 +65,14 @@
             AdjustMoveSpeedForDifficulty();
         }
     }
-    private int level = 1; // to start at level 1
+
+    // for starting the game
+    private void StartGame()
+    {
+        playerLives = 3;
+        InitializeGame();
+        gameTimer = new Timer(GameUpdate, null, 0, 16);
+    }
 
     protected override void OnInitialized()
     {
@@ -127,6 +148,8 @@
 
     private void GameUpdate(object state)
     {
+        Dictionary<double, Alien> bottomMostAliens = new Dictionary<double, Alien>();
+
         // Move bullets
         foreach (var bullet in bullets)
         {
@@ -193,6 +216,64 @@
             gameTimer.Dispose();  // then top the game timer
         }
 
+        frameCounter++;
+        if (frameCounter % 60 == 0)
+        {
+            // this makes the aliens shoot every second
+            // find the bottom-most alien for each column
+            foreach (var alien in aliens)
+            {
+                if (!bottomMostAliens.ContainsKey(alien.X) || bottomMostAliens[alien.X].Y < alien.Y)
+                {
+                    bottomMostAliens[alien.X] = alien;
+                }
+            }
+        }
+
+        // and randomly select one of these bottom-most aliens to shoot
+        if (bottomMostAliens.Values.Count > 0)
+        {
+            var shootingAlien = bottomMostAliens.Values.ElementAt(random.Next(0, bottomMostAliens.Values.Count));
+
+            // Log for debugging
+            Console.WriteLine("Alien at position (" + shootingAlien.X + ", " + shootingAlien.Y + ") is firing!");
+
+            var bullet = new AlienBullet
+                {
+                    X = (int)shootingAlien.X + 20,  // center the bullet relative to the alien.
+                    Y = (int)shootingAlien.Y + 40
+                };
+            alienBullets.Add(bullet);
+        }
+
+
+        // to move the alien bullets
+        foreach (var bullet in alienBullets)
+        {
+            bullet.Y += 5; // TODO: play with the speed for finetuning
+            Console.WriteLine($"Alien bullet at position ({bullet.X}, {bullet.Y})");
+
+        }
+
+        // check for collisions between alien bullets and the player
+        var hitPlayer = alienBullets.FirstOrDefault(b =>
+            b.X > player.X && b.X < player.X + 50 &&
+            b.Y > player.Y && b.Y < player.Y + 20
+        );
+
+        if (hitPlayer != null)
+        {
+            playerLives--;
+            if (playerLives <= 0)
+            {
+                isGameOver = true;
+                gameTimer.Dispose();
+            }
+            alienBullets.Remove(hitPlayer);
+        }
+        // and remove the bullets that are out of bound
+        alienBullets.RemoveAll(b => b.Y > 600);
+
         // and last if all aliens are destroyed, reset the game with a new wave
         if (!aliens.Any())
         {
@@ -203,12 +284,18 @@
         StateHasChanged();  // finally request a re-render
     }
 
-    private void RestartGame()
+    private void RestartGame() // resetting everything
     {
+        if (gameTimer != null)
+        {
+            gameTimer.Dispose();  // dispose the current timer
+        }
+
         isGameOver = false;
         score = 0;
         bullets.Clear();
         level = 1; // reset the level
+        playerLives = 3;
         InitializeGame();
         gameTimer = new Timer(GameUpdate, null, 0, 16); // and restart the game timer
     }

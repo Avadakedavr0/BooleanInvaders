@@ -2,8 +2,7 @@
 {
     public class AlienBullet
     {
-        public int X { get; set; } // X-coordinate
-        public int Y { get; set; } // Y-coordinate
-        public int Speed { get; } = 10; // Movement speed
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }
