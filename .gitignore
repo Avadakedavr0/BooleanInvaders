@@ -405,3 +405,4 @@ FodyWeavers.xsd
 /BooleanInvadersApp/Client/Properties/launchSettings.json
 /BooleanInvadersApp/Server/appsettings.json
 /BooleanInvadersApp/Server/appsettings.Development.json
+/BooleanInvadersApp/Server/Properties/launchSettings.json
