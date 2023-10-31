@@ -2,6 +2,9 @@
 @using BooleanInvadersApp.Client.Enums
 @page "/"
 
+<div class="game-wrapper">
+<img src="/Assets/Images/gametitle.png" alt="Harry Potter Game Title" class="game-title" />
+
 @if (!gameStarted)
 {
     <button @onclick="StartGame" class="start-game-btn">Start Game</button>
@@ -49,6 +52,7 @@
         <div class="game-over">Game Over</div>
         <button @onclick="RestartGame">Restart</button>
     }
+    </div>
 </div>
 
 @code {
