@@ -85,6 +85,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 15px;
 }
 
 .game-title {
@@ -123,8 +124,8 @@
 .game-info-wrapper {
     position: relative;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: start;
     justify-content: center;
 }
 
@@ -201,4 +202,37 @@ select {
     right: 20px;
     width: 50px; 
     cursor: pointer;
+}
+
+.high-scores {
+    margin-left: 20px;
+    color: #FFD700;
+    font-family: 'Georgia', serif;
+    font-size: 1.2em;
+    max-width: 200px;
+}
+
+    .high-scores h2 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+label[for="playerName"] {
+    font-family: 'Georgia', serif;
+    font-size: 1.2em;
+    color: #FFD700;
+    margin-right: 10px;
+}
+
+#playerName {
+    font-family: 'Georgia', serif;
+    font-size: 1.2em;
+    padding: 5px 10px;
+    background-color: #2c2c2c;
+    border: 2px solid #FFD700;
+    color: #FFD700;
+    border-radius: 5px;
+}
+.start-game-btn {
+    margin-top: 20px;
 }

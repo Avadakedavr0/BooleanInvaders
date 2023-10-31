@@ -2,6 +2,8 @@
 @using BooleanInvadersApp.Client.Enums
 @page "/"
 @inject IJSRuntime JSRuntime
+@using BooleanInvadersApp.Shared.Models
+@inject HttpClient Http
 
 <audio id="backgroundSound" loop>
     <source src="/Assets/Sounds/backgroundsoundHP.mp3" type="audio/mpeg">
@@ -14,6 +16,8 @@
 
     @if (!gameStarted)
     {
+        <label for="playerName">Enter Player Name:</label>
+        <input type="text" id="playerName" @bind="playerName" />
         <button @onclick="StartGame" class="start-game-btn">@(isGameOver ? "Restart Game" : "Start Game")</button>
     }
 
@@ -68,6 +72,13 @@
             }
 
         </div>
+        <div class="high-scores">
+            <h2>High Scores</h2>
+            @foreach (var score in top10HighScores)
+            {
+                <p>@score.PlayerName: @score.Score</p>
+            }
+        </div>
     </div>
 </div>
 
@@ -92,6 +103,35 @@
     private bool gameStarted = false;
     private bool isMuted = false;
     private string muteButtonText = "Mute";
+    private List<HighScore> top10HighScores = new List<HighScore>();
+    private string playerName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchTop10Scores();
+    }
+
+    private async Task FetchTop10Scores()
+    {
+        var response = await Http.GetAsync("api/HighScores/top10");
+
+        if (response.IsSuccessStatusCode)
+        {
+            top10HighScores = await response.Content.ReadFromJsonAsync<List<HighScore>>();
+        }
+        else
+        {
+            // Handle the error, maybe log the response or notify the user.
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Error fetching scores: {errorContent}");
+        }
+    }
+
+    private async Task UpdateHighScores(HighScore newHighScore)
+    {
+    await Http.PostAsJsonAsync("api/HighScores", newHighScore);
+    await FetchTop10Scores();
+    }
 
     private async Task OpenRickRoll()
     {
@@ -143,7 +183,20 @@
             AdjustMoveSpeedForDifficulty();
         }
     }
+    private async Task CheckAndUpdateHighScoresAsync()
+    {
+        if (top10HighScores.Count < 10 || score > top10HighScores.Last().Score)
+        {
+            var newHighScore = new HighScore
+                {
+                    PlayerName = playerName,
+                    Score = score,
+                    Date = DateTime.Now
+                };
+            await UpdateHighScores(newHighScore);
+        }
 
+    }
     // for starting the game
     private async Task StartGame()
     {
@@ -351,6 +404,8 @@
             {
                 isGameOver = true;
                 gameTimer.Dispose();
+                CheckAndUpdateHighScoresAsync();
+
             }
             alienBullets.Remove(hitPlayer);
         }

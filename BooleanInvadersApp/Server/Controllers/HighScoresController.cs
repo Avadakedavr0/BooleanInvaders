@@ -16,11 +16,36 @@ namespace BooleanInvadersApp.Server.Controllers
             _context = context;
         }
 
+        [HttpGet("top10")]
+        public async Task<IResult> GetTop10Scores()
+        {
+            var highScores = await _context.HighScores
+                                           .OrderByDescending(h => h.Score)
+                                           .Take(10)
+                                           .ToListAsync();
+            return Results.Ok(highScores);
+        }
+
         [HttpPost]
         public async Task<IResult> CreateHighScore(HighScore highScore)
         {
+            if (!ModelState.IsValid)
+            {
+                return Results.BadRequest(ModelState);
+            }
+
             _context.HighScores.Add(highScore);
             await _context.SaveChangesAsync();
+
+            // Ensure only top 10 scores are retained
+            var scoresToDelete = await _context.HighScores
+                                               .OrderByDescending(h => h.Score)
+                                               .Skip(10)
+                                               .ToListAsync();
+
+            _context.HighScores.RemoveRange(scoresToDelete);
+            await _context.SaveChangesAsync();
+
             return Results.Ok(highScore);
         }
 
