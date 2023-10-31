@@ -1,6 +1,12 @@
 ﻿@using BooleanInvadersApp.Client.Entities
 @using BooleanInvadersApp.Client.Enums
 @page "/"
+@inject IJSRuntime JSRuntime
+
+<audio id="backgroundSound" loop>
+    <source src="/Assets/Sounds/backgroundsoundHP.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
 
 <div class="game-wrapper">
     <img src="/Assets/Images/gametitle.png" alt="Harry Potter Game Title" class="game-title" />
@@ -21,6 +27,7 @@
             <div class="game-stats">
                 <div class="score">Score: @score</div>
                 <div class="lives">Lives: @playerLives</div>
+                <button @onclick="ToggleMute" class="mute-button">@muteButtonText</button>
             </div>
             @if (player != null)
             {
@@ -82,7 +89,43 @@
     private int lastShootingAlienIndex = -1;  // and nitialize to -1 so the first alien shoots first
     private int frameCounter = 0;  // initialize to 0
     private bool gameStarted = false;
+    private bool isMuted = false;
+    private string muteButtonText = "Mute";
 
+    private async Task ToggleMute()
+    {
+        if (isMuted)
+        {
+            await JSRuntime.InvokeVoidAsync("unmuteAudio", "backgroundSound");
+            muteButtonText = "Mute";
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("muteAudio", "backgroundSound");
+            muteButtonText = "Unmute";
+        }
+        isMuted = !isMuted;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await PlayBackgroundSound();
+        }
+    }
+
+    private async Task PlayBackgroundSound()
+    {
+        await JSRuntime.InvokeVoidAsync("playAudio", "backgroundSound");
+        await JSRuntime.InvokeVoidAsync("setVolume", "backgroundSound", 0.2);
+
+    }
+
+    private async Task PauseBackgroundSound()
+    {
+        await JSRuntime.InvokeVoidAsync("pauseAudio", "backgroundSound");
+    }
 
     // setting the difficulty
     public DifficultyLevel currentDifficulty
@@ -96,8 +139,9 @@
     }
 
     // for starting the game
-    private void StartGame()
+    private async Task StartGame()
     {
+        await PlayBackgroundSound(); // https://developer.chrome.com/blog/autoplay/ because of google autoplay policy
         gameStarted = true; // Always set gameStarted to true
         score = 0; // Always reset score
         playerLives = 3; // Always reset player lives
