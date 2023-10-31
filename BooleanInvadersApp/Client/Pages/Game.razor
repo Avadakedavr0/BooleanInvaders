@@ -10,6 +10,7 @@
 
 <div class="game-wrapper">
     <img src="/Assets/Images/gametitle.png" alt="Harry Potter Game Title" class="game-title" />
+    <img src="/Assets/Images/voldemortsmiling.gif" alt="Easter Egg" class="easter-egg" @onclick="OpenRickRoll" />
 
     @if (!gameStarted)
     {
@@ -91,6 +92,11 @@
     private bool gameStarted = false;
     private bool isMuted = false;
     private string muteButtonText = "Mute";
+
+    private async Task OpenRickRoll()
+    {
+        await JSRuntime.InvokeVoidAsync("open", "https://www.youtube.com/watch?v=8ybW48rKBME", "_blank");
+    }
 
     private async Task ToggleMute()
     {
