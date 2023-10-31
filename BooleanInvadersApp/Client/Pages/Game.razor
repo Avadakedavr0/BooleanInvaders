@@ -1,8 +1,11 @@
-﻿﻿@using BooleanInvadersApp.Client.Entities
+﻿@using BooleanInvadersApp.Client.Entities
 @using BooleanInvadersApp.Client.Enums
-@page "/BooleanInvaders"
+@page "/"
 
-<button @onclick="StartGame" class="start-game-btn">Start Game</button>
+@if (!gameStarted)
+{
+    <button @onclick="StartGame" class="start-game-btn">Start Game</button>
+}
 <div class="lives">Lives: @playerLives</div>
 <select @bind="currentDifficulty" @bind:event="onchange">
     <option value="Easy">Easy</option>
@@ -12,21 +15,33 @@
 
 <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
     <div class="score">Score: @score</div>
-    <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
-
-    @foreach (var alien in aliens)
+    @if (player != null)
     {
-        <div class="alien" style="left: @((int)alien.X + "px"); top: @((int)alien.Y + "px");"></div>
+        <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
     }
 
-    @foreach (var bullet in bullets)
+    @if (aliens != null)
     {
-        <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+        @foreach (var alien in aliens)
+        {
+            <div class="alien" style="left: @((int)alien.X + "px"); top: @((int)alien.Y + "px");"></div>
+        }
     }
 
-    @foreach (var bullet in alienBullets)
+    @if (bullets != null)
     {
-        <div class="alien-bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+        @foreach (var bullet in bullets)
+        {
+            <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+        }
+    }
+
+    @if (alienBullets != null)
+    {
+        @foreach (var bullet in alienBullets)
+        {
+            <div class="alien-bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+        }
     }
 
     @if (isGameOver)
@@ -54,6 +69,8 @@
     private Random random = new Random(); // for choosing a ramdon alien to shoot a bullet to the player
     private int lastShootingAlienIndex = -1;  // and nitialize to -1 so the first alien shoots first
     private int frameCounter = 0;  // initialize to 0
+    private bool gameStarted = false;
+
 
     // setting the difficulty
     public DifficultyLevel currentDifficulty
@@ -69,16 +86,18 @@
     // for starting the game
     private void StartGame()
     {
-        playerLives = 3;
-        InitializeGame();
-        gameTimer = new Timer(GameUpdate, null, 0, 16);
+        if (!gameStarted) // check if the game has not started yet
+        {
+            gameStarted = true; // and set the flag to indicate the game has started
+            playerLives = 3;
+            InitializeGame();
+            gameTimer = new Timer(GameUpdate, null, 0, 16);
+        }
     }
 
     protected override void OnInitialized()
     {
         AdjustMoveSpeedForDifficulty();
-        InitializeGame();
-        gameTimer = new Timer(GameUpdate, null, 0, 16); // 60 FPS
     }
 
     private void AdjustMoveSpeedForDifficulty() // for different difficulty levels
@@ -234,10 +253,6 @@
         if (bottomMostAliens.Values.Count > 0)
         {
             var shootingAlien = bottomMostAliens.Values.ElementAt(random.Next(0, bottomMostAliens.Values.Count));
-
-            // Log for debugging
-            Console.WriteLine("Alien at position (" + shootingAlien.X + ", " + shootingAlien.Y + ") is firing!");
-
             var bullet = new AlienBullet
                 {
                     X = (int)shootingAlien.X + 20,  // center the bullet relative to the alien.
@@ -251,8 +266,6 @@
         foreach (var bullet in alienBullets)
         {
             bullet.Y += 5; // TODO: play with the speed for finetuning
-            Console.WriteLine($"Alien bullet at position ({bullet.X}, {bullet.Y})");
-
         }
 
         // check for collisions between alien bullets and the player
@@ -290,7 +303,7 @@
         {
             gameTimer.Dispose();  // dispose the current timer
         }
-
+        gameStarted = false; // to reset the game started flag
         isGameOver = false;
         score = 0;
         bullets.Clear();

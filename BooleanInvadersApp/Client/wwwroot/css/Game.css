@@ -3,7 +3,7 @@
     position: relative;
     width: 800px;
     height: 600px;
-    border: 1px solid black;
+    border: 1px solid navy;
 }
 
 .player, .alien, .bullet {
@@ -12,21 +12,24 @@
 
 .player {
     width: 50px;
-    height: 20px;
-    background-color: blue;
+    height: 45px;
+    background-image: url('/Assets/Images/player.png');
+    background-size: cover;
 }
 
 .alien {
-    width: 40px;
-    height: 40px;
-    background-color: green;
+    width: 50px;
+    height: 60px;
+    background-image: url('/Assets/Images/alien.png');
+    background-size: cover;
     transform: translateZ(0);
 }
 
 .bullet {
-    width: 5px;
-    height: 10px;
-    background-color: purple;
+    width: 10px;
+    height: 20px;
+    background-image: url('/Assets/Images/bullet.png');
+    background-size: cover;
 }
 
 .game-over {
@@ -56,9 +59,21 @@
 }
 
 .alien-bullet {
-    width: 5px;
-    height: 10px;
-    background-color: red;
+    width: 20px;
+    height: 30px;
+    background-image: url('/Assets/Images/alienbullet.png');
+    background-size: cover;
     position: absolute;
     z-index: 1000;
+}
+
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('/Assets/Images/background.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
 }
