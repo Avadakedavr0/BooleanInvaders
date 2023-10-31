@@ -3,55 +3,63 @@
 @page "/"
 
 <div class="game-wrapper">
-<img src="/Assets/Images/gametitle.png" alt="Harry Potter Game Title" class="game-title" />
+    <img src="/Assets/Images/gametitle.png" alt="Harry Potter Game Title" class="game-title" />
 
-@if (!gameStarted)
-{
-    <button @onclick="StartGame" class="start-game-btn">Start Game</button>
-}
-<div class="lives">Lives: @playerLives</div>
-<select @bind="currentDifficulty" @bind:event="onchange">
-    <option value="Easy">Easy</option>
-    <option value="Medium">Medium</option>
-    <option value="Hard">Hard</option>
-</select>
-
-<div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
-    <div class="score">Score: @score</div>
-    @if (player != null)
+    @if (!gameStarted)
     {
-        <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
+        <button @onclick="StartGame" class="start-game-btn">@(isGameOver ? "Restart Game" : "Start Game")</button>
     }
 
-    @if (aliens != null)
-    {
-        @foreach (var alien in aliens)
-        {
-            <div class="alien" style="left: @((int)alien.X + "px"); top: @((int)alien.Y + "px");"></div>
-        }
-    }
+    <div class="game-info-wrapper">
+        <select @bind="currentDifficulty" @bind:event="onchange">
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+        </select>
 
-    @if (bullets != null)
-    {
-        @foreach (var bullet in bullets)
-        {
-            <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
-        }
-    }
+        <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
+            <div class="game-stats">
+                <div class="score">Score: @score</div>
+                <div class="lives">Lives: @playerLives</div>
+            </div>
+            @if (player != null)
+            {
+                <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
+            }
 
-    @if (alienBullets != null)
-    {
-        @foreach (var bullet in alienBullets)
-        {
-            <div class="alien-bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
-        }
-    }
+            @if (aliens != null)
+            {
+                @foreach (var alien in aliens)
+                {
+                    <div class="alien" style="left: @((int)alien.X + "px"); top: @((int)alien.Y + "px");"></div>
+                }
+            }
 
-    @if (isGameOver)
-    {
-        <div class="game-over">Game Over</div>
-        <button @onclick="RestartGame">Restart</button>
-    }
+            @if (bullets != null)
+            {
+                @foreach (var bullet in bullets)
+                {
+                    <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+                }
+            }
+
+            @if (alienBullets != null)
+            {
+                @foreach (var bullet in alienBullets)
+                {
+                    <div class="alien-bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
+                }
+            }
+
+            @if (isGameOver)
+            {
+                <div class="game-over-container">
+                    <div class="game-over">Game Over</div>
+                    <button @onclick="StartGame">Restart</button>
+                </div>
+            }
+
+        </div>
     </div>
 </div>
 
@@ -90,13 +98,21 @@
     // for starting the game
     private void StartGame()
     {
-        if (!gameStarted) // check if the game has not started yet
+        gameStarted = true; // Always set gameStarted to true
+        score = 0; // Always reset score
+        playerLives = 3; // Always reset player lives
+        level = 1; // Always reset level
+
+        if (isGameOver)
         {
-            gameStarted = true; // and set the flag to indicate the game has started
-            playerLives = 3;
-            InitializeGame();
-            gameTimer = new Timer(GameUpdate, null, 0, 16);
+            isGameOver = false;
         }
+
+        bullets = bullets ?? new List<PlayerBullet>();
+        bullets.Clear(); // Clear bullets
+
+        InitializeGame();
+        gameTimer = new Timer(GameUpdate, null, 0, 16);
     }
 
     protected override void OnInitialized()
@@ -299,21 +315,5 @@
         }
 
         StateHasChanged();  // finally request a re-render
-    }
-
-    private void RestartGame() // resetting everything
-    {
-        if (gameTimer != null)
-        {
-            gameTimer.Dispose();  // dispose the current timer
-        }
-        gameStarted = false; // to reset the game started flag
-        isGameOver = false;
-        score = 0;
-        bullets.Clear();
-        level = 1; // reset the level
-        playerLives = 3;
-        InitializeGame();
-        gameTimer = new Timer(GameUpdate, null, 0, 16); // and restart the game timer
     }
 }

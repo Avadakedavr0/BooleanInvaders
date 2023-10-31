@@ -3,7 +3,12 @@
     position: relative;
     width: 800px;
     height: 600px;
-    border: 1px solid navy;
+    border: 1px solid #76ABDF;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .player, .alien, .bullet {
@@ -26,30 +31,26 @@
 }
 
 .bullet {
-    width: 10px;
-    height: 20px;
+    width: 15px;
+    height: 30px;
     background-image: url('/Assets/Images/bullet.png');
     background-size: cover;
 }
 
-.game-over {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2rem;
-    color: red;
-}
-
 .start-game-btn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
+    font-family: 'Georgia', serif;
+    font-size: 1.5em;
+    color: #FFD700;
+    position: absolute;
+    background-color: brown;
+    padding: 10px 10px;
     border: none;
     cursor: pointer;
     margin: 10px 0;
-    display: block;
+    display: round;
     font-size: 1.2em;
+    z-index: 10;
+    pointer-events: auto;
 }
 
 .lives {
@@ -92,4 +93,81 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+.game-over {
+    font-family: 'Georgia', serif;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.score {
+    font-family: 'Georgia', serif; 
+    font-size: 1.5em;
+    color: #FFD700; 
+    position: absolute;
+    top: -5px; 
+    left: 10px;
+}
+
+.lives {
+    font-family: 'Georgia', serif; 
+    font-size: 1.5em;
+    color: #FFD700;
+    position: absolute;
+    top: -5px;
+    right: 10px;
+}
+
+.game-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+select {
+    font-family: 'Georgia', serif;
+    font-size: 1.2em;
+    background-color: #2c2c2c;
+    color: #FFD700; 
+    padding: 5px 10px;
+    border: 2px solid #FFD700; 
+    cursor: pointer;
+    border-radius: 5px; 
+}
+
+.game-over-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); 
+}
+
+.game-over-container button {
+        font-family: 'Georgia', serif;
+        font-size: 1.5em;
+        color: #FFD700;
+        background-color: brown;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+        border-radius: 5px;
+}
+
+.game-over-container button:hover {
+            background-color: #8B4513;
 }
