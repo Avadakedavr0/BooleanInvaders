@@ -1,5 +1,6 @@
 ﻿@using BooleanInvadersApp.Client.Entities
 @using BooleanInvadersApp.Client.Enums
+@using System.Text.Json
 @page "/"
 @inject IJSRuntime JSRuntime
 @using BooleanInvadersApp.Shared.Models
@@ -18,7 +19,9 @@
     {
         <label for="playerName">Enter Player Name:</label>
         <input type="text" id="playerName" @bind="playerName" />
-        <button @onclick="StartGame" class="start-game-btn">@(isGameOver ? "Restart Game" : "Start Game")</button>
+        <button @onclick="StartGame" class="start-game-btn" disabled="@string.IsNullOrWhiteSpace(playerName)">
+            @(isGameOver ? "Restart Game" : "Start Game")
+        </button>
     }
 
     <div class="game-info-wrapper">
@@ -113,24 +116,25 @@
 
     private async Task FetchTop10Scores()
     {
-        var response = await Http.GetAsync("api/HighScores/top10");
-
-        if (response.IsSuccessStatusCode)
+        var jsonScores = await JSRuntime.InvokeAsync<string>("blazorLocalStorage.getItem", "top10HighScores");
+        if (!string.IsNullOrEmpty(jsonScores))
         {
-            top10HighScores = await response.Content.ReadFromJsonAsync<List<HighScore>>();
+            top10HighScores = JsonSerializer.Deserialize<List<HighScore>>(jsonScores);
         }
         else
         {
-            // Handle the error, maybe log the response or notify the user.
-            var errorContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Error fetching scores: {errorContent}");
+            top10HighScores = new List<HighScore>();
         }
     }
 
     private async Task UpdateHighScores(HighScore newHighScore)
     {
-    await Http.PostAsJsonAsync("api/HighScores", newHighScore);
-    await FetchTop10Scores();
+        top10HighScores.Add(newHighScore);
+        // Ensure the list is ordered and only the top 10 scores are kept
+        top10HighScores = top10HighScores.OrderByDescending(score => score.Score).Take(10).ToList();
+
+        var jsonScores = JsonSerializer.Serialize(top10HighScores);
+        await JSRuntime.InvokeVoidAsync("blazorLocalStorage.setItem", "top10HighScores", jsonScores);
     }
 
     private async Task OpenRickRoll()
@@ -206,6 +210,18 @@
         playerLives = 3; // Always reset player lives
         level = 1; // Always reset level
 
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Please enter a player name to start the game.");
+            return; // Exit the method without starting the game
+        }
+
+        // Change the cursor style to indicate game mode
+        await JSRuntime.InvokeVoidAsync("changeCursorStyle", "crosshair");
+
+         // Set focus to the game container to capture keyboard events
+        await JSRuntime.InvokeVoidAsync("focusGameContainer");
+
         if (isGameOver)
         {
             isGameOver = false;
@@ -216,6 +232,15 @@
 
         InitializeGame();
         gameTimer = new Timer(GameUpdate, null, 0, 16);
+    }
+
+    private async Task EndGame()
+    {
+        isGameOver = true;
+        gameTimer?.Dispose(); // Stop the game timer
+
+        // Reset the cursor style to default
+        await JSRuntime.InvokeVoidAsync("changeCursorStyle", "default");
     }
 
     protected override void OnInitialized()
@@ -276,10 +301,12 @@
 
         switch (e.Key)
         {
-            case "ArrowLeft":
+            case "S":
+            case "s":
                 player.X = Math.Max(player.X - moveDistance, 0);  // not going out of the bound with this
                 break;
-            case "ArrowRight":
+            case "D":
+            case "d":
                 player.X = Math.Min(player.X + moveDistance, 750);  // for now 800px width and 50px player width ----> need to correct later
                 break;
             case " ":
@@ -354,8 +381,7 @@
         if (aliens.Any(a => a.Y + 40 >= 550) ||  // Alien reached the bottom
             aliens.Any(a => a.X >= player.X && a.X <= player.X + 50 && a.Y >= player.Y && a.Y <= player.Y + 20))  // an alien collided with player
         {
-            isGameOver = true;
-            gameTimer.Dispose();  // then top the game timer
+            EndGame();
         }
 
         frameCounter++;

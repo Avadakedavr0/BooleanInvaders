@@ -11,6 +11,28 @@
     <link href="BooleanInvadersApp.Client.styles.css" rel="stylesheet" />
     <link href="css/game.css" rel="stylesheet" />
     <script src="sound.js"></script>
+    <script>
+        function changeCursorStyle(style) {
+            document.body.style.cursor = style;
+        }
+
+        window.blazorLocalStorage = {
+            getItem: function (key) {
+                return localStorage.getItem(key);
+            },
+            setItem: function (key, value) {
+                localStorage.setItem(key, value);
+            }
+        };
+
+        function focusGameContainer() {
+            var gameContainer = document.querySelector('.game-container');
+            if (gameContainer) {
+                gameContainer.focus();
+            }
+        };
+
+    </script>
 </head>
 
 <body>
