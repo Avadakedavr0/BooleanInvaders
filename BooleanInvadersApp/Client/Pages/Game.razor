@@ -23,13 +23,19 @@
             @(isGameOver ? "Restart Game" : "Start Game")
         </button>
     }
-
+    @if (gameStarted && !isGameOver)
+    {
+        <button @onclick="EndGame" class="end-game-btn">End Game</button>
+    }
     <div class="game-info-wrapper">
-        <select @bind="currentDifficulty" @bind:event="onchange">
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-        </select>
+        @if (!gameStarted || isGameOver)
+        {
+            <select @bind="currentDifficulty" @bind:event="onchange">
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+        }
 
         <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
             <div class="game-stats">
@@ -183,8 +189,11 @@
         get => _currentDifficulty;
         set
         {
-            _currentDifficulty = value;
-            AdjustMoveSpeedForDifficulty();
+            if (!gameStarted) // Only allow changing difficulty when the game has not started
+            {
+                _currentDifficulty = value;
+                AdjustMoveSpeedForDifficulty();
+            }
         }
     }
     private async Task CheckAndUpdateHighScoresAsync()
@@ -237,10 +246,17 @@
     private async Task EndGame()
     {
         isGameOver = true;
+        gameStarted = false; // Set gameStarted to false to stop the game
         gameTimer?.Dispose(); // Stop the game timer
 
         // Reset the cursor style to default
         await JSRuntime.InvokeVoidAsync("changeCursorStyle", "default");
+
+        // Reset the cursor style to default
+        await JSRuntime.InvokeVoidAsync("changeCursorStyle", "default");
+
+        // Call StateHasChanged if needed to refresh the UI
+        StateHasChanged();
     }
 
     protected override void OnInitialized()
@@ -263,6 +279,7 @@
                 break;
         }
     }
+
 
     private void InitializeGame()
     {

@@ -1,14 +1,33 @@
-﻿
+﻿@import url(https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700);
+
+p, h2 {
+    font-family: 'Open Sans Condensed', arial;
+}
+
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('/Assets/Images/background.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
 .game-container {
     position: relative;
     width: 800px;
     height: 600px;
-    border: 1px solid #76ABDF;
     margin-top: 30px;
     display: flex;
     flex-direction: column;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     justify-content: center;
     align-items: center;
+    background: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
+    box-shadow: 0px 0px 20px 25px rgba(30, 134, 51, 0.1);
 }
 
 .player, .alien, .bullet {
@@ -38,9 +57,8 @@
 }
 
 .start-game-btn {
-    font-family: 'Georgia', serif;
     font-size: 1.5em;
-    color: #FFD700;
+    color: #1ba3a5;
     position: absolute;
     background-color: brown;
     padding: 10px 10px;
@@ -54,12 +72,6 @@
     border-radius: 5px;
 }
 
-.lives {
-    margin-top: 10px;
-    font-size: 1.2em;
-    color: #333;
-}
-
 .alien-bullet {
     width: 20px;
     height: 30px;
@@ -67,17 +79,6 @@
     background-size: cover;
     position: absolute;
     z-index: 1000;
-}
-
-.page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-image: url('/Assets/Images/background.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-attachment: fixed;
 }
 
 .game-wrapper {
@@ -99,23 +100,22 @@
 
 .game-over {
     font-family: 'Georgia', serif;
-    color: #FFD700;
+    font-size: 5rem;
+    color: #1ba3a5;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .score {
-    font-family: 'Georgia', serif; 
     font-size: 1.5em;
-    color: #FFD700; 
+    color: #1ba3a5;
     position: absolute;
-    top: -5px; 
+    top: -5px;
     left: 10px;
 }
 
 .lives {
-    font-family: 'Georgia', serif; 
     font-size: 1.5em;
-    color: #FFD700;
+    color: #1ba3a5;
     position: absolute;
     top: -5px;
     right: 10px;
@@ -160,7 +160,6 @@ select {
 }
 
 .game-over-container button {
-        font-family: 'Georgia', serif;
         font-size: 1.5em;
         color: #FFD700;
         background-color: brown;
@@ -177,8 +176,8 @@ select {
 
 .mute-button {
     position: absolute;
-    top: -30px;
-    left: 50%;
+    top: -38px;
+    left: 95%;
     transform: translateX(-50%);
     font-family: 'Georgia', serif;
     font-size: 0.7em;
@@ -188,12 +187,10 @@ select {
     padding: 5px 15px;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .mute-button:hover {
         background-color: #8B4513;
-        transform: scale(1.1);
 }
 
 .easter-egg {
@@ -205,34 +202,54 @@ select {
 }
 
 .high-scores {
-    margin-left: 20px;
-    color: #FFD700;
-    font-family: 'Georgia', serif;
-    font-size: 1.2em;
-    max-width: 200px;
+    top: 30px;
+    position:absolute;
+    color: #1ba3a5;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    padding: 10px;
+    border-radius: 10px;
+    width: 200px;
+    right: -300px;
 }
 
-    .high-scores h2 {
-        font-size: 1.5em;
-        margin-bottom: 10px;
+.high-scores h2 {
+        font-size: 2rem;
+        margin-bottom:20px;
     }
 
 label[for="playerName"] {
     font-family: 'Georgia', serif;
     font-size: 1.2em;
-    color: #FFD700;
+    color: #1ba3a5;
     margin-right: 10px;
 }
 
 #playerName {
-    font-family: 'Georgia', serif;
     font-size: 1.2em;
     padding: 5px 10px;
-    background-color: #2c2c2c;
-    border: 2px solid #FFD700;
-    color: #FFD700;
-    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    border: 2px solid #1ba3a5;
+    color: #1ba3a5;
+    border-radius: 10px;
 }
 .start-game-btn {
     margin-top: 20px;
+    position: center;
 }
+
+.end-game-btn {
+    font-family: 'Georgia', serif;
+    font-size: 1em;
+    color: #FFF;
+    background-color: #D32F2F; /* Red button for ending the game */
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+    .end-game-btn:hover {
+        background-color: #B71C1C; /* Darker red on hover */
+    }
