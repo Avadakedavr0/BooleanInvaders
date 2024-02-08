@@ -1,6 +1,7 @@
 ﻿@using BooleanInvadersApp.Client.Entities
 @using BooleanInvadersApp.Client.Enums
 @using System.Text.Json
+@using BlazorTypewriter;
 @page "/"
 @inject IJSRuntime JSRuntime
 @using BooleanInvadersApp.Shared.Models
@@ -17,7 +18,12 @@
 
     @if (!gameStarted)
     {
-        <label for="playerName">Enter Player Name:</label>
+        {
+            <div class="welcome-container">
+                <Typewriter Builder="@typewriter" />
+            </div>
+        }
+        <label for="playerName">Enter Player Name</label>
         <input type="text" id="playerName" @bind="playerName" />
         <button @onclick="StartGame" class="start-game-btn" disabled="@string.IsNullOrWhiteSpace(playerName)">
             @(isGameOver ? "Restart Game" : "Start Game")
@@ -29,6 +35,7 @@
     }
     <div class="game-info-wrapper">
         @if (!gameStarted || isGameOver)
+
         {
             <select @bind="currentDifficulty" @bind:event="onchange">
                 <option value="Easy">Easy</option>
@@ -76,7 +83,7 @@
             {
                 <div class="game-over-container">
                     <div class="game-over">Game Over</div>
-                    <button @onclick="StartGame">Restart</button>
+                    <button @onclick="StartGame" class="start-game-btn">Try again</button>
                 </div>
             }
 
@@ -85,7 +92,7 @@
             <h2>High Scores</h2>
             @foreach (var score in top10HighScores)
             {
-                <p>@score.PlayerName: @score.Score</p>
+                <p>@score.PlayerName  @score.Score</p>
             }
         </div>
     </div>
@@ -114,6 +121,20 @@
     private string muteButtonText = "Mute";
     private List<HighScore> top10HighScores = new List<HighScore>();
     private string playerName = "";
+    private string displayedText = "";
+    private int textIndex = 0;
+
+    // Typewriter effect for manual
+    TypewriterBuilder typewriter = new TypewriterBuilder(defaultCharacterPause: 3)
+    .TypeString("Welcome to Boolean Invaders, a wizarding challenge that will test your skills. ", 50)
+    .Pause(2000)
+    .TypeString("First, declare your name and choose a level of difficulty. ", 50)
+    .Pause(2000)
+    .TypeString("Then, with a wave of your wand, press start to begin your adventure! ", 50)
+    .Pause(2000)
+    .TypeString("Use 'S' to move left and 'D' to move right across the mystical battleground. When it's time to counter the dementors, a simple tap of 'P' unleashes a spell to repel and vanquish the invaders. ", 50)
+    .Pause(2000)
+    .Pause(5000);
 
     protected override async Task OnInitializedAsync()
     {
@@ -225,12 +246,6 @@
             return; // Exit the method without starting the game
         }
 
-        // Change the cursor style to indicate game mode
-        await JSRuntime.InvokeVoidAsync("changeCursorStyle", "crosshair");
-
-         // Set focus to the game container to capture keyboard events
-        await JSRuntime.InvokeVoidAsync("focusGameContainer");
-
         if (isGameOver)
         {
             isGameOver = false;
@@ -248,12 +263,6 @@
         isGameOver = true;
         gameStarted = false; // Set gameStarted to false to stop the game
         gameTimer?.Dispose(); // Stop the game timer
-
-        // Reset the cursor style to default
-        await JSRuntime.InvokeVoidAsync("changeCursorStyle", "default");
-
-        // Reset the cursor style to default
-        await JSRuntime.InvokeVoidAsync("changeCursorStyle", "default");
 
         // Call StateHasChanged if needed to refresh the UI
         StateHasChanged();
@@ -326,7 +335,8 @@
             case "d":
                 player.X = Math.Min(player.X + moveDistance, 750);  // for now 800px width and 50px player width ----> need to correct later
                 break;
-            case " ":
+            case "P":
+            case "p":
                 FireBullet();
                 break;
         }

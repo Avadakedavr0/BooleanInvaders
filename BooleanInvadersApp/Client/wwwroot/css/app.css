@@ -4,16 +4,13 @@ html, body {
     font-family: 'Helveica Neue', Helvetica, Arial, sans-serif;
 }
 
-h1:focus {
-    outline: none;
-}
 
 a, .btn-link {
     color: #0071c1;
 }
 
 .btn-primary {
-    color: #fff;
+    color: #1861ac;
     background-color: #1b6ec2;
     border-color: #1861ac;
 }
