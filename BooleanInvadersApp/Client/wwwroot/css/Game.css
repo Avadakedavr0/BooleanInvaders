@@ -151,13 +151,11 @@ select {
     top: -10px;
 }
 
-    select:hover {
+    select:focus {
         background: rgba(0, 0, 0, 0.7);
+        color: #C0C0C0;
     }
 
-    select:after {
-        background: rgba(0, 0, 0, 097);
-    }
 
 .game-over-container {
     display: flex;
@@ -170,27 +168,28 @@ select {
     height: 600px;
     border: 0px solid rgba(0, 0, 0, 0.1);
     border-radius: 11px;
-    box-shadow: inset 1px 1px 100px 20px rgba(124, 0, 1, 0.7);
+    box-shadow: inset 1px 1px 100px 70px rgba(124, 0, 1, 0.4);
 }
 
     .game-over-container button {
         position: absolute;
-        font-size: 1.5em;
-        color: #FFD700;
-        background: rgba(0, 0, 0, 0.8);
-        padding: 10px 20px;
+        font-size: 1.4em;
+        color: #C0C0C0;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px 15px;
         border: none;
         cursor: pointer;
         margin-top: 20px;
-        border-radius: 5px;
-        box-shadow: 0px 0px 20px 25px rgba(30, 134, 51, 0.1);
-        top: 30px;
+        border-radius: 44px;
+        box-shadow: 0px 0px 20px 25px rgba(30, 134, 51, 0.2);
+        top: 70px;
+        border: 3px solid #1ba3a5;
     }
 
         .game-over-container button:hover {
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: 0px 0px 20px 35px rgba(30, 134, 51, 0.1);
-            color: #FFD700;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0px 0px 30px 50px rgba(30, 134, 51, 0.2);
+            color: #C0C0C0;
         }
 
 .mute-button {
@@ -266,8 +265,8 @@ label[for="playerName"] {
     .start-game-btn:hover {
         margin-top: 20px;
         position: center;
-        color: green;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.7);
+        box-shadow: 0px 0px 25px rgba(6, 116, 0, 0.3);
     }
 
 .end-game-btn {
@@ -300,4 +299,5 @@ label[for="playerName"] {
     font-family: 'Cinzel', serif;
     font-size: 18px;
     z-index: 5;
+    box-shadow: 0px 0px 25px rgba(6, 116, 0, 0.3);
 }
