@@ -18,15 +18,13 @@
 
     @if (!gameStarted)
     {
-        {
-            <div class="welcome-container">
-                <Typewriter Builder="@typewriter" />
-            </div>
-        }
+        <div class="welcome-container">
+            <Typewriter Builder="@typewriter" />
+        </div>
         <label for="playerName">Enter Player Name</label>
         <input type="text" id="playerName" @bind="playerName" />
         <button @onclick="StartGame" class="start-game-btn" disabled="@string.IsNullOrWhiteSpace(playerName)">
-            @(isGameOver ? "Restart Game" : "Start Game")
+            Start Game
         </button>
     }
     @if (gameStarted && !isGameOver)
@@ -79,13 +77,13 @@
                 }
             }
 
-            @if (isGameOver)
-            {
-                <div class="game-over-container">
-                    <div class="game-over">Game Over</div>
-                    <button @onclick="StartGame" class="start-game-btn">Try again</button>
-                </div>
-            }
+@if (isGameOver)
+{
+    <div class="game-over-container">
+        <div class="game-over">Game Over</div>
+        <button @onclick="StartGame" class="restart-game-btn">Try again</button>
+    </div>
+}
 
         </div>
         <div class="high-scores">
