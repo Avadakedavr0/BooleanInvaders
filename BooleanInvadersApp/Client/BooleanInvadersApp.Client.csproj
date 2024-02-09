@@ -16,8 +16,4 @@
     <ProjectReference Include="..\Shared\BooleanInvadersApp.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\Assets\Sounds\" />
-  </ItemGroup>
-
 </Project>

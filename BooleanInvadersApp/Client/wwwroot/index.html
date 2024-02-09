@@ -11,6 +11,10 @@
     <link href="BooleanInvadersApp.Client.styles.css" rel="stylesheet" />
     <link href="css/Game.css" rel="stylesheet" />
     <link href="_content/BlazorTypewriter/styles.css" rel="stylesheet" />
+    <audio id="hitSound">
+        <source src="/Assets/Sounds/HIT.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
     <script src="sound.js"></script>
     <script>
         function changeCursorStyle(style) {
@@ -32,6 +36,10 @@
                 gameContainer.focus();
             }
         };
+        function playHitSound() {
+            var hitSound = document.getElementById('hitSound');
+            hitSound.play();
+        }
     </script>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
 </head>

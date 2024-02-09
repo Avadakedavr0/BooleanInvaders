@@ -126,15 +126,13 @@
 
     // Typewriter effect for manual
     TypewriterBuilder typewriter = new TypewriterBuilder(defaultCharacterPause: 3)
-    .TypeString("Welcome to Boolean Invaders, a wizarding challenge that will test your skills. ", 50)
+    .TypeString("Welcome to Boolean Invaders, a wizarding challenge that will test your skills. ", 10)
     .Pause(2000)
-    .TypeString("First, declare your name and choose a level of difficulty. ", 50)
+    .TypeString("First, declare your name and choose a level of difficulty. ", 10)
     .Pause(2000)
-    .TypeString("Then, with a wave of your wand, press start to begin your adventure! ", 50)
+    .TypeString("Then, with a wave of your wand, press start to begin your adventure! ", 10)
     .Pause(2000)
-    .TypeString("Use 'S' to move left and 'D' to move right across the mystical battleground. When it's time to counter the dementors, a simple tap of 'P' unleashes a spell to repel and vanquish the invaders. ", 50)
-    .Pause(2000)
-    .Pause(5000);
+    .TypeString("Use 'S' to move left and 'D' to move right across the mystical battleground. When it's time to counter the dementors, a simple tap of 'P' unleashes a spell to repel and vanquish the invaders. ", 10);
 
     protected override async Task OnInitializedAsync()
     {
@@ -239,6 +237,9 @@
         score = 0; // Always reset score
         playerLives = 3; // Always reset player lives
         level = 1; // Always reset level
+
+        // Invoke the JavaScript function to focus the game container
+        await JSRuntime.InvokeVoidAsync("focusGameContainer");
 
         if (string.IsNullOrWhiteSpace(playerName))
         {
