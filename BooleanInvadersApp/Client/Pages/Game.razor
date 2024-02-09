@@ -6,6 +6,7 @@
 @inject IJSRuntime JSRuntime
 @using BooleanInvadersApp.Shared.Models
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <audio id="backgroundSound" loop>
     <source src="/Assets/Sounds/backgroundsoundHP.mp3" type="audio/mpeg">
@@ -30,6 +31,7 @@
     @if (gameStarted && !isGameOver)
     {
         <button @onclick="EndGame" class="end-game-btn">End Game</button>
+    
     }
     <div class="game-info-wrapper">
         @if (!gameStarted || isGameOver)
@@ -81,10 +83,11 @@
 {
     <div class="game-over-container">
         <div class="game-over">Game Over</div>
-        <button @onclick="StartGame" class="restart-game-btn">Try again</button>
-    </div>
+                    <button @onclick="StartGame" class="start-game-btn" disabled="@string.IsNullOrWhiteSpace(playerName)">
+                        Start Game
+                    </button>
+                </div>
 }
-
         </div>
         <div class="high-scores">
             <h2>High Scores</h2>
@@ -231,18 +234,18 @@
     private async Task StartGame()
     {
         await PlayBackgroundSound(); // https://developer.chrome.com/blog/autoplay/ because of google autoplay policy
-        gameStarted = true; // Always set gameStarted to true
-        score = 0; // Always reset score
-        playerLives = 3; // Always reset player lives
-        level = 1; // Always reset level
+        gameStarted = true; // always set gameStarted to true
+        score = 0; // always reset score
+        playerLives = 3; // always reset player lives
+        level = 1; // always reset level
 
-        // Invoke the JavaScript function to focus the game container
+        // invoke the JavaScript function to focus the game container
         await JSRuntime.InvokeVoidAsync("focusGameContainer");
 
         if (string.IsNullOrWhiteSpace(playerName))
         {
             await JSRuntime.InvokeVoidAsync("alert", "Please enter a player name to start the game.");
-            return; // Exit the method without starting the game
+            return; // exit the method without starting the game
         }
 
         if (isGameOver)
@@ -259,11 +262,11 @@
 
     private async Task EndGame()
     {
-        isGameOver = true;
-        gameStarted = false; // Set gameStarted to false to stop the game
-        gameTimer?.Dispose(); // Stop the game timer
-
-        // Call StateHasChanged if needed to refresh the UI
+        gameStarted = false; // set gameStarted to false to stop the game
+        gameTimer?.Dispose(); // stop the game timer
+        bullets.Clear(); // Clear bullets
+        aliens.Clear(); // Clear bullets
+        // call StateHasChanged if needed to refresh the UI
         StateHasChanged();
     }
 
