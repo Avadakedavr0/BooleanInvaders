@@ -4,7 +4,8 @@
 Boolean Invaders: The Wizarding Challenge is a web-based game crafted with the Blazor framework. This game merges the nostalgic charm of classic space-invader arcade games with the magical allure of the Harry Potter universe.
 
 ## Gameplay
-Players are introduced to the game with a spellbinding typewriter animation that sets the stage for the adventure. They are prompted to:
+Players are introduced to the game with a typewriter animation that sets the stage for the adventure. 
+They are prompted to:
 
 - Enter their wizarding name
 - Choose their desired difficulty level: Easy, Medium, or Hard
@@ -28,9 +29,11 @@ The game utilizes Blazor's robust component-based structure for a clean, modular
 Opting for Blazor, a framework typically reserved for more traditional web apps, showcases my commitment to think outside the box. 
 Leveraging Blazor's seamless integration of C# and .NET in the browser to deliver a unique gaming experience.
 
-#TODO
--Fix bugs.
--Add mode name (easy,..) to highscore or make seperate highscore board for it.
--Finish/Connect high-score (top 10) with Azure SQL database instead of local.
--Find a way to use left and right arrow for character movement without having an influence on the gameplay. (https://stackoverflow.com/questions/60348208/c-sharp-blazor-how-to-prevent-specific-key-on-input-like-in-js-with-e-preventde)
--Make the game itself look more Harry Potter themed.
+
+### TODO
+
+- Fix bugs.
+- Add mode name (easy,..) to highscore or make seperate highscore board for it.
+- Finish/Connect high-score (top 10) with Azure SQL database instead of local.
+- Find a way to use left and right arrow for character movement without having an influence on the gameplay. (https://stackoverflow.com/questions/60348208/c-sharp-blazor-how-to-prevent-specific-key-on-input-like-in-js-with-e-preventde)
+- Make the game itself look more Harry Potter themed.
