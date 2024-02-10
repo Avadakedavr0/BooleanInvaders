@@ -133,7 +133,7 @@
     .Pause(2000)
     .TypeString("Then, with a wave of your wand, press start to begin your adventure! ", 10)
     .Pause(2000)
-    .TypeString("Use 'S' to move left and 'D' to move right across the mystical battleground. When it's time to counter the dementors, a simple tap of 'P' unleashes a spell to repel and vanquish the invaders. ", 10);
+    .TypeString("Use 'A' to move left and 'D' to move right across the mystical battleground. When it's time to counter the dementors, a simple tap of 'W' unleashes a spell to repel and vanquish the invaders. ", 10);
 
     protected override async Task OnInitializedAsync()
     {
@@ -329,16 +329,16 @@
 
         switch (e.Key)
         {
-            case "S":
-            case "s":
+            case "A":
+            case "a":
                 player.X = Math.Max(player.X - moveDistance, 0);  // not going out of the bound with this
                 break;
             case "D":
             case "d":
                 player.X = Math.Min(player.X + moveDistance, 750);  // for now 800px width and 50px player width ----> need to correct later
                 break;
-            case "P":
-            case "p":
+            case "W":
+            case "w":
                 FireBullet();
                 break;
         }
