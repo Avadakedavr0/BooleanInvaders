@@ -11,7 +11,7 @@ They are prompted to:
 - Choose their desired difficulty level: Easy, Medium, or Hard
 
 Armed with their wands, players must fend off an array of Dementors descending from above. 
-The game is controlled through keyboard interactions, allowing players to move horizontally with "S" for left, "D" for right and cast spells with "P" to defeat their foes.
+The game is controlled through keyboard interactions, allowing players to move horizontally with "A" for left, "D" for right and cast spells with "W" to defeat their foes.
 
 ## Features
 
