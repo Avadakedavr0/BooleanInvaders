@@ -16,31 +16,7 @@
         Your browser does not support the audio element.
     </audio>
     <script src="sound.js"></script>
-    <script>
-        function changeCursorStyle(style) {
-            document.body.style.cursor = style;
-        }
-
-        window.blazorLocalStorage = {
-            getItem: function (key) {
-                return localStorage.getItem(key);
-            },
-            setItem: function (key, value) {
-                localStorage.setItem(key, value);
-            }
-        };
-
-        function focusGameContainer() {
-            var gameContainer = document.querySelector('.game-container');
-            if (gameContainer) {
-                gameContainer.focus();
-            }
-        };
-        function playHitSound() {
-            var hitSound = document.getElementById('hitSound');
-            hitSound.play();
-        }
-    </script>
+    <script src="app.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700' rel='stylesheet' type='text/css'>
 </head>
 
