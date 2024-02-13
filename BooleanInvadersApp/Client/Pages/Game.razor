@@ -1,4 +1,5 @@
-﻿@using BooleanInvadersApp.Client.Entities
+﻿// --- UI and Setup ---
+@using BooleanInvadersApp.Client.Entities
 @using BooleanInvadersApp.Client.Enums
 @using System.Text.Json
 @using BlazorTypewriter;
@@ -8,6 +9,7 @@
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
+<!-- Background music setup -->
 <audio id="backgroundSound" loop>
     <source src="/Assets/Sounds/backgroundsoundHP.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
@@ -15,12 +17,14 @@
 
 <div class="game-wrapper">
     <img src="/Assets/Images/gametitle.png" alt="Harry Potter Game Title" class="game-title" />
+    <!-- sneaky Easter egg -->
     <img src="/Assets/Images/voldemortsmiling.gif" alt="Easter Egg" class="easter-egg" @onclick="OpenRickRoll" />
 
+    <!-- welcome screen, enter your name and start the game -->
     @if (!gameStarted)
     {
         <div class="welcome-container">
-            <Typewriter Builder="@typewriter" />
+            <Typewriter Builder="@typewriter" /> <!-- typing effect -->
         </div>
         <label for="playerName">Enter Player Name</label>
         <input type="text" id="playerName" @bind="playerName" />
@@ -28,15 +32,17 @@
             Start Game
         </button>
     }
+    <!-- if you don't want to play anymore, you can exit current game with pressing the endgame button -->
     @if (gameStarted && !isGameOver)
     {
         <button @onclick="EndGame" class="end-game-btn">End Game</button>
     
     }
+    <!--  Gameplay UI - where the magic happens -->
     <div class="game-info-wrapper">
         @if (!gameStarted || isGameOver)
-
         {
+            <!-- difficulty selector -->
             <select @bind="currentDifficulty" @bind:event="onchange">
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
@@ -44,17 +50,21 @@
             </select>
         }
 
+        <!-- the gamefield itself -->
         <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0">
+            <!-- scoring and lives -->
             <div class="game-stats">
                 <div class="score">Score: @score</div>
                 <div class="lives">Lives: @playerLives</div>
+                <!-- mute button -->
                 <button @onclick="ToggleMute" class="mute-button">@muteButtonText</button>
             </div>
+            <!-- the player's avatar, in gamefield coordinatees -->
             @if (player != null)
             {
                 <div class="player" style="left: @(player.X + "px"); top: @(player.Y + "px");"></div>
             }
-
+            <!-- the aliens, for the harry potter theme dementors -->
             @if (aliens != null)
             {
                 @foreach (var alien in aliens)
@@ -62,7 +72,7 @@
                     <div class="alien" style="left: @((int)alien.X + "px"); top: @((int)alien.Y + "px");"></div>
                 }
             }
-
+            <!-- the bullets, in our current theme magic spells -->
             @if (bullets != null)
             {
                 @foreach (var bullet in bullets)
@@ -70,7 +80,7 @@
                     <div class="bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
                 }
             }
-
+            <!-- enemy bullets, in current theme demontor spells -->
             @if (alienBullets != null)
             {
                 @foreach (var bullet in alienBullets)
@@ -78,17 +88,18 @@
                     <div class="alien-bullet" style="left: @(bullet.X + "px"); top: @(bullet.Y + "px");"></div>
                 }
             }
-
-@if (isGameOver)
-{
-    <div class="game-over-container">
-        <div class="game-over">Game Over</div>
+            <!-- gmae over screen, with option to start again -->
+            @if (isGameOver)
+            {
+                <div class="game-over-container">
+                    <div class="game-over">Game Over</div>
                     <button @onclick="StartGame" class="start-game-btn" disabled="@string.IsNullOrWhiteSpace(playerName)">
                         Start Game
                     </button>
                 </div>
-}
+             }
         </div>
+        <!-- hall of fame, current stored local (will be updated to top 10 global leaderboard) -->
         <div class="high-scores">
             <h2>High Scores</h2>
             @foreach (var score in top10HighScores)
@@ -99,33 +110,31 @@
     </div>
 </div>
 
+<!-- game logic -->
 @code {
-    private Timer gameTimer;
-    private PlayerShip player;
-    private List<Alien> aliens;
-    private List<PlayerBullet> bullets;
-    private bool isGameOver = false;
-    private List<PlayerBullet> bulletsToRemove = new List<PlayerBullet>();
-    private int score = 0;
-    private bool moveDown = false;
+    private Timer gameTimer; // the heart of the game - keeps things moving
+    private PlayerShip player; // player ship, for the curent theme Harry Potter
+    private List<Alien> aliens; // the aliens, in current theme the dementors
+    private List<PlayerBullet> bullets; // our player's bullet, in current theme the magic spells
+    private bool isGameOver = false; // boolean value for is game over or not
+    private List<PlayerBullet> bulletsToRemove = new List<PlayerBullet>(); // list to store bullets
+    private int score = 0; // point system
     private double baseMoveSpeed = 0.1; // base speed
     private double moveSpeedIncrement = 0.1; // speed increase per level
-    private DifficultyLevel _currentDifficulty = DifficultyLevel.Easy; // default easy
+    private DifficultyLevel _currentDifficulty = DifficultyLevel.Easy; // default easy as standard
     private int level = 1; // to start at level 1
     private int playerLives = 3; // to start with 3 lives for the current player
     private List<AlienBullet> alienBullets = new List<AlienBullet>(); // to track the alien bullets
     private Random random = new Random(); // for choosing a ramdon alien to shoot a bullet to the player
     private int lastShootingAlienIndex = -1;  // and nitialize to -1 so the first alien shoots first
     private int frameCounter = 0;  // initialize to 0
-    private bool gameStarted = false;
-    private bool isMuted = false;
-    private string muteButtonText = "Mute";
-    private List<HighScore> top10HighScores = new List<HighScore>();
-    private string playerName = "";
-    private string displayedText = "";
-    private int textIndex = 0;
+    private bool gameStarted = false; // standard the game is not started
+    private bool isMuted = false; // silince is golden
+    private string muteButtonText = "Mute"; // mute button text
+    private List<HighScore> top10HighScores = new List<HighScore>(); // list for storing highscores -- local for now
+    private string playerName = ""; // for player name
 
-    // Typewriter effect for manual
+    // Typewriter effect for story telling
     TypewriterBuilder typewriter = new TypewriterBuilder(defaultCharacterPause: 3)
     .TypeString("Welcome to Boolean Invaders, a wizarding challenge that will test your skills. ", 10)
     .Pause(2000)
@@ -135,11 +144,13 @@
     .Pause(2000)
     .TypeString("Use 'A' to move left and 'D' to move right across the mystical battleground. When it's time to counter the dementors, a simple tap of 'W' unleashes a spell to repel and vanquish the invaders. ", 10);
 
+    // game setup
     protected override async Task OnInitializedAsync()
     {
-        await FetchTop10Scores();
+        await FetchTop10Scores(); // fetch the highscores, for now local -- will be global
     }
 
+    // high scores
     private async Task FetchTop10Scores()
     {
         var jsonScores = await JSRuntime.InvokeAsync<string>("blazorLocalStorage.getItem", "top10HighScores");
@@ -149,25 +160,28 @@
         }
         else
         {
-            top10HighScores = new List<HighScore>();
+            top10HighScores = new List<HighScore>(); // a clean list
         }
     }
 
+    // check if your score will get on highscore list
     private async Task UpdateHighScores(HighScore newHighScore)
     {
         top10HighScores.Add(newHighScore);
-        // Ensure the list is ordered and only the top 10 scores are kept
+        // ensure the list is ordered and only the top 10 scores are kept
         top10HighScores = top10HighScores.OrderByDescending(score => score.Score).Take(10).ToList();
 
         var jsonScores = JsonSerializer.Serialize(top10HighScores);
         await JSRuntime.InvokeVoidAsync("blazorLocalStorage.setItem", "top10HighScores", jsonScores);
     }
 
+    //rickroll easter egg
     private async Task OpenRickRoll()
     {
         await JSRuntime.InvokeVoidAsync("open", "https://www.youtube.com/watch?v=8ybW48rKBME", "_blank");
     }
 
+    // to toggle mute button
     private async Task ToggleMute()
     {
         if (isMuted)
@@ -193,73 +207,83 @@
 
     private async Task PlayBackgroundSound()
     {
-        await JSRuntime.InvokeVoidAsync("playAudio", "backgroundSound");
-        await JSRuntime.InvokeVoidAsync("setVolume", "backgroundSound", 0.2);
+        await JSRuntime.InvokeVoidAsync("playAudio", "backgroundSound"); // play the audio
+        await JSRuntime.InvokeVoidAsync("setVolume", "backgroundSound", 0.2); // setting the volume not to loud
 
     }
 
+    // mute to pause
     private async Task PauseBackgroundSound()
     {
         await JSRuntime.InvokeVoidAsync("pauseAudio", "backgroundSound");
     }
 
-    // setting the difficulty
+    // setting the difficulty: easy, medium or hard
     public DifficultyLevel currentDifficulty
     {
-        get => _currentDifficulty;
+        get => _currentDifficulty; // current or standard easy
         set
         {
-            if (!gameStarted) // Only allow changing difficulty when the game has not started
+            if (!gameStarted) // only allow changing difficulty when the game has not started
             {
                 _currentDifficulty = value;
-                AdjustMoveSpeedForDifficulty();
+                AdjustMoveSpeedForDifficulty(); // changing movement speed for our dementors in line with the choosen difficulty
             }
         }
     }
+
+    // for updating the highscores
+    // if there are not 10 scores in highscore, add it to list
+    // if there are 10 score allready on list, check if your current score is more then the lowest score in the list
     private async Task CheckAndUpdateHighScoresAsync()
     {
         if (top10HighScores.Count < 10 || score > top10HighScores.Last().Score)
         {
             var newHighScore = new HighScore
                 {
-                    PlayerName = playerName,
-                    Score = score,
-                    Date = DateTime.Now
+                    PlayerName = playerName, // add name
+                    Score = score, // add score
+                    Date = DateTime.Now // add date -- under construction
                 };
             await UpdateHighScores(newHighScore);
         }
 
     }
+
     // for starting the game
     private async Task StartGame()
     {
-        await PlayBackgroundSound(); // https://developer.chrome.com/blog/autoplay/ because of google autoplay policy
+        await PlayBackgroundSound(); // https://developer.chrome.com/blog/autoplay/ because of google autoplay policy we can not start playing music directly when page is loaded
         gameStarted = true; // always set gameStarted to true
         score = 0; // always reset score
         playerLives = 3; // always reset player lives
         level = 1; // always reset level
 
-        // invoke the JavaScript function to focus the game container
+        // invoke the JavaScript function to focus the game container - because otherwise you first need to click in the game container itself before you can use the A, D and W controls
         await JSRuntime.InvokeVoidAsync("focusGameContainer");
 
+        // making sure you first enter a name before you can start the game
         if (string.IsNullOrWhiteSpace(playerName))
         {
             await JSRuntime.InvokeVoidAsync("alert", "Please enter a player name to start the game.");
             return; // exit the method without starting the game
         }
 
+        // making sure game over is set to false
         if (isGameOver)
         {
             isGameOver = false;
         }
 
+        // make empty list for bullets (magic spells) and make sure its empty
         bullets = bullets ?? new List<PlayerBullet>();
-        bullets.Clear(); // Clear bullets
+        bullets.Clear(); // clear bullets
 
-        InitializeGame();
-        gameTimer = new Timer(GameUpdate, null, 0, 16);
+        InitializeGame(); // set the game
+        gameTimer = new Timer(GameUpdate, null, 0, 16); // set game timer
     }
 
+    // setting up game over
     private async Task EndGame()
     {
         gameStarted = false; // set gameStarted to false to stop the game
@@ -272,44 +296,46 @@
 
     protected override void OnInitialized()
     {
-        AdjustMoveSpeedForDifficulty();
+        AdjustMoveSpeedForDifficulty(); // set the pace for dementor movement in line with difficulty
     }
 
-    private void AdjustMoveSpeedForDifficulty() // for different difficulty levels
+    // for different difficulty levels, wanted to have easy acces to change the speed when testing the game if it's hard enough to play or not
+    private void AdjustMoveSpeedForDifficulty() 
     {
         switch (currentDifficulty)
         {
             case DifficultyLevel.Easy:
-                baseMoveSpeed = 0.05;
+                baseMoveSpeed = 0.05; // easy is pretty slow, but can ramp up fast
                 break;
             case DifficultyLevel.Medium:
-                baseMoveSpeed = 0.1; 
+                baseMoveSpeed = 0.1;  // medium is more challenging
                 break;
             case DifficultyLevel.Hard:
-                baseMoveSpeed = 0.2; 
+                baseMoveSpeed = 0.2; // and hard is difficult to play
                 break;
         }
     }
 
-
+    // setting up de requirements for gameplay
     private void InitializeGame()
     {
-        player = new PlayerShip { X = 400, Y = 550 }; // starting position
-        aliens = new List<Alien>();
-        bullets = new List<PlayerBullet>();
+        player = new PlayerShip { X = 400, Y = 550 }; // starting position for playership (current theme it is Harry Potter)
+        aliens = new List<Alien>(); // new list with dementors
+        bullets = new List<PlayerBullet>(); // setting up new list for player bullets
 
-        // to initialize aliens in a grid
+        // to initialize dementors in a grid
         int startingX = 180;
         int startingY = 50;
-        for (int row = 0; row < 5; row++) // 5 rows of aliens
+        for (int row = 0; row < 5; row++) // 5 rows of dementors
         {
-            for (int col = 0; col < 10; col++) // 10 columns
+            for (int col = 0; col < 10; col++) // 10 columns of dementors
             {
                 aliens.Add(new Alien { X = startingX + col * 60, Y = startingY + row * 40, MovingRight = true });
             }
         }
     }
 
+    // setting up to fire bullets
     private void FireBullet()
     {
         if (!bullets.Any()) // so it only fires if there's not a bullet on screen
@@ -319,13 +345,14 @@
                     X = player.X + 22,  // to center the bullet relative to the player
                     Y = player.Y
                 };
-            bullets.Add(bullet);
+            bullets.Add(bullet); // adding the bullet
         }
     }
 
+    // to handle the keyboard event for movement and magic spells
     private void HandleKeyDown(KeyboardEventArgs e)
     {
-        const int moveDistance = 20;
+        const int moveDistance = 20; // movement distance for a tap, so we can change it later
 
         switch (e.Key)
         {
@@ -344,17 +371,18 @@
         }
     }
 
+    // in game updates
     private void GameUpdate(object state)
     {
         Dictionary<double, Alien> bottomMostAliens = new Dictionary<double, Alien>();
 
-        // Move bullets
+        // move bullets
         foreach (var bullet in bullets)
         {
             bullet.Y -= 20;  // we can adjust speed as needed
         }
 
-        // Collision detection
+        // collision detection
         foreach (var bullet in bullets)
         {
             var hitAlien = aliens.FirstOrDefault(a =>
@@ -363,17 +391,17 @@
 
             if (hitAlien != null)
             {
-                // differentiate score based on alien row -> TODO
+                // differentiate score based on alien row 
                 int alienRowIndex = aliens.IndexOf(hitAlien) / 10; //  10 columns
                 if (alienRowIndex == 0)
-                    score += 30;
+                    score += 30; // 30 points for top row dementors
                 else if (alienRowIndex >= 1 && alienRowIndex <= 3)
-                    score += 20;
+                    score += 20; //2 to 4 get 20 points
                 else
-                    score += 10;
+                    score += 10; // row 5 get 10 points
 
-                aliens.Remove(hitAlien);
-                bulletsToRemove.Add(bullet);
+                aliens.Remove(hitAlien); // remove the dementor that was hit
+                bulletsToRemove.Add(bullet); // remove the bullet on hit
             }
         }
 
@@ -401,23 +429,25 @@
         }
 
         // the regular left-right movement
-        double moveSpeed = baseMoveSpeed + (level - 1) * moveSpeedIncrement; // ----TODO
+        double moveSpeed = baseMoveSpeed + (level - 1) * moveSpeedIncrement;
         foreach (var alien in aliens)
         {
             alien.X += alien.MovingRight ? moveSpeed : -moveSpeed;
         }
 
+        // game over when alien reached the bottom or alien collied with player
         if (aliens.Any(a => a.Y + 40 >= 550) ||  // Alien reached the bottom
             aliens.Any(a => a.X >= player.X && a.X <= player.X + 50 && a.Y >= player.Y && a.Y <= player.Y + 20))  // an alien collided with player
         {
             EndGame();
         }
 
+        // heart of the game
         frameCounter++;
-        if (frameCounter % 60 == 0)
+        if (frameCounter % 60 == 0) // for 60fps
         {
             // this makes the aliens shoot every second
-            // find the bottom-most alien for each column
+            // find the bottom-most alien for each column that shoots
             foreach (var alien in aliens)
             {
                 if (!bottomMostAliens.ContainsKey(alien.X) || bottomMostAliens[alien.X].Y < alien.Y)
@@ -436,14 +466,14 @@
                     X = (int)shootingAlien.X + 20,  // center the bullet relative to the alien.
                     Y = (int)shootingAlien.Y + 40
                 };
-            alienBullets.Add(bullet);
+            alienBullets.Add(bullet); // add that bullet to list
         }
 
 
         // to move the alien bullets
         foreach (var bullet in alienBullets)
         {
-            bullet.Y += 5; // TODO: play with the speed for finetuning
+            bullet.Y += 5; // TODO: play with the speed for finetuning to make game harder or more easy
         }
 
         // check for collisions between alien bullets and the player
@@ -452,17 +482,17 @@
             b.Y > player.Y && b.Y < player.Y + 20
         );
 
-        if (hitPlayer != null)
+        if (hitPlayer != null) // if the player lives are 0, game is over
         {
             playerLives--;
             if (playerLives <= 0)
             {
                 isGameOver = true;
-                gameTimer.Dispose();
-                CheckAndUpdateHighScoresAsync();
+                gameTimer.Dispose(); // dispose game timer
+                CheckAndUpdateHighScoresAsync(); // update highscores if needed
 
             }
-            alienBullets.Remove(hitPlayer);
+            alienBullets.Remove(hitPlayer); // remove bullet
         }
         // and remove the bullets that are out of bound
         alienBullets.RemoveAll(b => b.Y > 600);
