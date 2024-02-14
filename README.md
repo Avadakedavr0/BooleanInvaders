@@ -27,9 +27,19 @@ The game utilizes Blazor's robust component-based structure for a clean, modular
 
 ## Challenges and resolutions
 - Real-time state updates, achieved through strategic application of Blazor's StateHasChanged() method in conjunction with a timing mechanism, ensuring consistent and responsive gameplay.
+  
 - Game loop optimization: the main game loop is optimized to ensure that logic execution, rendering, and input handling are efficiently managed. The loop runs at a consistent rate, executing game logic updates and rendering commands within the 16.67ms target. This is crucial for maintaining a smooth 60 fps gameplay experience. (gameTimer = new Timer(GameUpdate, null, 0, 16); instead of using requestAnimationFrame in Javascript. By setting the timer to trigger every 16 milliseconds, the game aims to update roughly every 16.67ms, which aligns with the target for 60 frames per second (1000ms / 60 ≈ 16.67ms). This means the game logic and rendering updates are intended to occur 60 times per second, providing a smooth gameplay experience.
-- Collision detection accuracy: realized through position and boundary calculations within the game update loop, essential for maintaining gameplay integrity. Iterating over bullets: the game loops through each bullet currently active in the game. This approach focuses the collision checks on bullets that are in play, reducing the number of unnecessary checks for bullets that have already been removed or are not yet fired. Targeted collision check: for each bullet, the code checks if there's any alien (Dementor) occupying the space where the bullet currently is. This is done using a FirstOrDefault LINQ query that looks for the first alien whose bounding box intersects with the bullet's position. The conditions bullet.X > a.X && bullet.X < a.X + 40 && bullet.Y > a.Y && bullet.Y < a.Y + 40 effectively determine if the bullet is within the bounding box of an alien. Efficiency: by only checking for collisions between bullets and aliens that could potentially intersect (based on the bullet's current position), the game minimizes the number of comparisons needed. This is more efficient than a naive approach where every bullet would be checked against every alien, leading to a significantly higher number of comparisons, especially as the number of aliens and bullets increases.
+  
+- Collision detection accuracy: realized through position and boundary calculations within the game update loop, essential for maintaining gameplay integrity.
+
+- Iterating over bullets: the game loops through each bullet currently active in the game. This approach focuses the collision checks on bullets that are in play, reducing the number of unnecessary checks for bullets that have already been removed or are not yet fired.
+
+- Targeted collision check: for each bullet, the code checks if there's any alien (Dementor) occupying the space where the bullet currently is. This is done using a FirstOrDefault LINQ query that looks for the first alien whose bounding box intersects with the bullet's position. The conditions bullet.X > a.X && bullet.X < a.X + 40 && bullet.Y > a.Y && bullet.Y < a.Y + 40 effectively determine if the bullet is within the bounding box of an alien.
+  
+- Efficiency: by only checking for collisions between bullets and aliens that could potentially intersect (based on the bullet's current position), the game minimizes the number of comparisons needed. This is more efficient than a naive approach where every bullet would be checked against every alien, leading to a significantly higher number of comparisons, especially as the number of aliens and bullets increases.
+  
 - Keyboard input handling: done by Blazor's event handling capabilities (KeyboardEventArgs), ensuring responsive and unobstructed game control.
+  
 - Cross-browser audio control: done through the utilization of IJSRuntime to invoke JavaScript functions, ensuring consistent audio control functionality.
 
 
@@ -40,7 +50,7 @@ Leveraging Blazor's seamless integration of C# and .NET in the browser to delive
 ### Live Demo
 Hosted on Azure: https://brave-rock-054608a03.4.azurestaticapps.net/
 
-#### Video Demo: coming soon.
+#### Video Demo: https://youtu.be/tv8SOZYuUF8
 
 ### TODO
 
